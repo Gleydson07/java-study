@@ -3,11 +3,11 @@ package ex01;
 import java.time.LocalDate;
 
 public class Transaction {
-    private LocalDate createdAt;
-    private TransactionType transactionType;
-    private Double value;
-    private Double balance;
-    private Integer targetAccountNumber;
+    protected LocalDate createdAt;
+    protected TransactionType transactionType;
+    protected Double value;
+    protected Double balance;
+    protected Integer targetAccountNumber;
 
     public Transaction(
         LocalDate createdAt,

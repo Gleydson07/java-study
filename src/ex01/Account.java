@@ -20,7 +20,7 @@ public class Account {
         Random random = new Random();
 
         this.accountNumber = random.nextInt(10000000, 99999999);
-        this.agency = random.nextInt(1000, 99999999);
+        this.agency = random.nextInt(1000, 9999);
         this.isEnabled = true;
 
         this.clientName = clientName;
@@ -82,15 +82,29 @@ public class Account {
         this.disabledReason = reason;
     }
 
-    protected String getAccountNumber() {
-        return this.agency + "/" + this.accountNumber;
+    protected void getAccountNumber() {
+        System.out.println("Agencia/Conta: " + this.agency + "/" + this.accountNumber);
     }
 
     protected void getTransactions() {
-        String result = transactions.stream()
-            .map(t -> t.toString())
-            .collect(Collectors.joining(", "));
+        this.getTransactions(null, null);
+    }
 
+    protected void getTransactions(LocalDate startDate, LocalDate endDate) {
+        String result = transactions.stream()
+            .filter(t -> startDate == null || !t.createdAt.isBefore(startDate))
+            .filter(t -> endDate == null || !t.createdAt.isAfter(endDate))
+            .map(t -> "Data: " + t.createdAt +
+                " | Tipo: " + t.transactionType +
+                " | Valor: " + t.value +
+                " | Saldo: " + t.balance +
+                " | Conta: " + t.targetAccountNumber + "\n")
+            .collect(Collectors.joining());
+
+        System.out.println(
+            "Cliente: " + this.clientName + "\n"+
+            "Agencia/Conta: " + this.agency + "/" + this.accountNumber
+        );
         System.out.println(result);
     }
 }
