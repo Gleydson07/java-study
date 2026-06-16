@@ -1,5 +1,6 @@
 package ex01;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ public class Account {
     private String disabledReason;
     private String clientName;
     private LocalDate bornDate;
-    private Double balance = 0.00;
+    private BigDecimal balance = BigDecimal.valueOf(0);
     private List<Transaction> transactions = new ArrayList<>();
 
     public Account(String clientName, LocalDate bornDate) {
@@ -27,22 +28,24 @@ public class Account {
         this.bornDate = bornDate;
     }
 
-    protected void withdraw(Double value, LocalDate date) {
-        if (this.balance >= value) {
-            this.balance = this.balance - value;
-
-            Transaction transaction = new Transaction(
-                date,
-                TransactionType.WITHDRAW,
-                value * -1,
-                this.balance
-            );
-            transactions.add(transaction);
+    public void withdraw(BigDecimal value, LocalDate date) {
+        if (this.balance.compareTo(value) < 0) {
+            throw new IllegalStateException("Saldo insuficiente");
         }
+
+        this.balance = this.balance.subtract(value);
+
+        Transaction transaction = new Transaction(
+            date,
+            TransactionType.WITHDRAW,
+            value.multiply(BigDecimal.valueOf(-1)),
+            this.balance
+        );
+        transactions.add(transaction);
     }
 
-    protected void deposit(Double value, LocalDate date) {
-        this.balance = this.balance + value;
+    public void deposit(BigDecimal value, LocalDate date) {
+        this.balance = this.balance.add(value);
 
         Transaction transaction = new Transaction(
             date,
@@ -53,44 +56,46 @@ public class Account {
         transactions.add(transaction);
     }
 
-    protected void transfer(Double value, LocalDate date, Account targetAccount) {
-        if (this.balance >= value) {
-            this.balance = this.balance - value;
-
-            Transaction transactionOut = new Transaction(
-                date,
-                TransactionType.WITHDRAW,
-                value * -1,
-                this.balance,
-                targetAccount.accountNumber
-            );
-            transactions.add(transactionOut);
-
-            targetAccount.balance += value;
-            targetAccount.transactions.add(new Transaction(
-                date,
-                TransactionType.DEPOSIT,
-                value,
-                targetAccount.balance,
-                this.accountNumber
-            ));
+    public void transfer(BigDecimal value, LocalDate date, Account targetAccount) {
+        if (this.balance.compareTo(value) < 0) {
+            throw new IllegalStateException("Saldo insuficiente");
         }
+
+        this.balance = this.balance.subtract(value);
+
+        Transaction transactionOut = new Transaction(
+            date,
+            TransactionType.WITHDRAW,
+            value.multiply(BigDecimal.valueOf(-1)),
+            this.balance,
+            targetAccount.accountNumber
+        );
+        transactions.add(transactionOut);
+
+        targetAccount.balance.add(value);
+        targetAccount.transactions.add(new Transaction(
+            date,
+            TransactionType.DEPOSIT,
+            value,
+            targetAccount.balance,
+            this.accountNumber
+        ));
     }
 
-    protected void deleteAccount(String reason) {
+    public void deleteAccount(String reason) {
         this.isEnabled = false;
         this.disabledReason = reason;
     }
 
-    protected void getAccountNumber() {
-        System.out.println("Agencia/Conta: " + this.agency + "/" + this.accountNumber);
+    public String getAccountNumber() {
+        return "Agencia/Conta: " + this.agency + "/" + this.accountNumber;
     }
 
-    protected void getTransactions() {
-        this.getTransactions(null, null);
+    public String getTransactions() {
+        return this.getTransactions(null, null);
     }
 
-    protected void getTransactions(LocalDate startDate, LocalDate endDate) {
+    public String getTransactions(LocalDate startDate, LocalDate endDate) {
         String result = transactions.stream()
             .filter(t -> startDate == null || !t.createdAt.isBefore(startDate))
             .filter(t -> endDate == null || !t.createdAt.isAfter(endDate))
@@ -101,10 +106,8 @@ public class Account {
                 " | Conta: " + t.targetAccountNumber + "\n")
             .collect(Collectors.joining());
 
-        System.out.println(
-            "Cliente: " + this.clientName + "\n"+
-            "Agencia/Conta: " + this.agency + "/" + this.accountNumber
-        );
-        System.out.println(result);
+        return "Cliente: " + this.clientName + "\n"+
+            "Agencia/Conta: " + this.agency + "/" + this.accountNumber + "\n" +
+            result;
     }
 }

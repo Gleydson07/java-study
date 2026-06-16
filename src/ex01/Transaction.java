@@ -1,19 +1,20 @@
 package ex01;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class Transaction {
-    protected LocalDate createdAt;
-    protected TransactionType transactionType;
-    protected Double value;
-    protected Double balance;
-    protected Integer targetAccountNumber;
+public record Transaction {
+    LocalDate createdAt;
+    TransactionType transactionType;
+    BigDecimal value;
+    BigDecimal balance;
+    Integer targetAccountNumber;
 
-    public Transaction(
+    Transaction(
         LocalDate createdAt,
         TransactionType transactionType,
-        Double value,
-        Double balance,
+        BigDecimal value,
+        BigDecimal balance,
         Integer targetAccount
     ) {
         this.createdAt = createdAt;
@@ -23,11 +24,11 @@ public class Transaction {
         this.targetAccountNumber = targetAccount;
     }
 
-    public Transaction(
+    Transaction(
         LocalDate createdAt,
         TransactionType transactionType,
-        Double value,
-        Double balance
+        BigDecimal value,
+        BigDecimal balance
     ) {
         this.createdAt = createdAt;
         this.transactionType = transactionType;
